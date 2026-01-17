@@ -6,7 +6,6 @@
     <title>Portail DNA FAMILY - Vérification</title>
     <style>
         :root {
-            /* Couleurs légèrement ajustées pour le mélange néon */
             --neon-cyan: rgb(0, 247, 255);
             --neon-pink: rgb(255, 0, 234);
             --dark-bg: #080810;
@@ -15,121 +14,141 @@
         body {
             font-family: 'Segoe UI', sans-serif;
             background-color: var(--dark-bg);
-            /* Fond statique très subtil */
-            background-image: radial-gradient(circle at 50% 50%, rgba(15, 15, 25, 1) 0%, #000 100%);
+            /* Fond sombre avec vignetage pour mettre l'accent au centre */
+            background-image: radial-gradient(circle at 50% 50%, #1a1a2e 0%, #000 100%);
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             margin: 0;
             color: #fff;
-            overflow: hidden; /* Important pour la 3D */
-            perspective: 1000px; /* Donne la profondeur 3D à toute la scène */
+            overflow: hidden; /* Important : cache ce qui dépasse */
+            perspective: 1000px;
         }
 
-        /* --- NOUVELLE ANIMATION DOUBLE HÉLICE 3D --- */
-        .dna-container {
+        /* --- CONTENEUR GLOBAL DES ANIMATIONS --- */
+        .dna-stage {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: -1; /* Derrière le formulaire */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transform-style: preserve-3d;
+            z-index: -1;
+            pointer-events: none;
         }
 
+        /* Configuration de base d'une hélice */
         .helix {
-            position: relative;
-            width: 120px; /* Largeur de l'échelle ADN */
-            height: 800px; /* Hauteur totale de la structure */
+            position: absolute;
+            top: 50%; /* Centré verticalement */
+            width: 80px; 
+            height: 900px; /* Assez haut pour couvrir l'écran */
             transform-style: preserve-3d;
-            /* Inclinaison globale pour mieux voir la 3D */
-            transform: rotateX(20deg) rotateZ(-10deg);
         }
 
-        /* Chaque "tranche" horizontale de l'ADN (une paire de bases) */
+        /* Positionnement Gauche */
+        .helix.left {
+            left: 5%;
+            transform: translateY(-50%) rotateX(15deg) rotateY(10deg);
+        }
+
+        /* Positionnement Droite */
+        .helix.right {
+            right: 5%;
+            transform: translateY(-50%) rotateX(15deg) rotateY(-10deg); /* Inclinaison opposée */
+        }
+
+        /* --- TRANCHES (BARREAUX) DE L'ADN --- */
         .slice {
             position: absolute;
             top: 50%;
             left: 0;
             width: 100%;
-            height: 3px; /* Très fin */
-            /* Le dégradé crée le barreau central, transparent au milieu */
+            height: 3px;
+            /* Couleur par défaut (Gauche) : Cyan vers Rose */
             background: linear-gradient(90deg, 
                 var(--neon-cyan) 0%, 
                 rgba(0, 247, 255, 0.2) 20%,
-                transparent 40%, transparent 60%,
+                transparent 45%, transparent 55%, /* Centre transparent */
                 rgba(255, 0, 234, 0.2) 80%,
                 var(--neon-pink) 100%);
             
-            /* Positionnement vertical et torsion initiale basés sur l'index CSS (défini en JS) */
-            --y-pos: calc((var(--i) - 30) * 12px); /* Espacement vertical */
-            --base-rotation: calc(var(--i) * 18deg); /* Torsion progressive */
+            --y-pos: calc((var(--i) - 30) * 14px); /* Espacement vertical */
+            --base-rotation: calc(var(--i) * 20deg); /* Torsion */
             
             transform: translateY(var(--y-pos)) rotateY(var(--base-rotation));
-            animation: twistHelix 8s linear infinite;
+            animation: twistHelix 6s linear infinite;
         }
 
-        /* Les "billes" brillantes aux extrémités des brins */
+        /* Variation pour l'hélice de Droite (Couleurs inversées et rotation inverse) */
+        .helix.right .slice {
+            animation-direction: reverse; /* Tourne dans l'autre sens */
+            /* Rose vers Cyan */
+            background: linear-gradient(90deg, 
+                var(--neon-pink) 0%, 
+                rgba(255, 0, 234, 0.2) 20%,
+                transparent 45%, transparent 55%,
+                rgba(0, 247, 255, 0.2) 80%,
+                var(--neon-cyan) 100%);
+        }
+        
+        /* Billes aux extrémités (Gauche) */
         .slice::before, .slice::after {
             content: '';
             position: absolute;
-            width: 8px;
-            height: 8px;
+            width: 6px;
+            height: 6px;
             border-radius: 50%;
-            top: -2.5px;
-            box-shadow: 0 0 10px currentColor;
+            top: -1.5px;
+            box-shadow: 0 0 8px currentColor;
         }
-        .slice::before { left: -4px; background: var(--neon-cyan); color: var(--neon-cyan); }
-        .slice::after { right: -4px; background: var(--neon-pink); color: var(--neon-pink); }
+        .slice::before { left: -3px; background: var(--neon-cyan); color: var(--neon-cyan); }
+        .slice::after { right: -3px; background: var(--neon-pink); color: var(--neon-pink); }
 
-        /* L'animation fait tourner chaque tranche de 360deg en plus de sa torsion initiale */
+        /* Billes aux extrémités (Droite - Inversion des couleurs) */
+        .helix.right .slice::before { background: var(--neon-pink); color: var(--neon-pink); }
+        .helix.right .slice::after { background: var(--neon-cyan); color: var(--neon-cyan); }
+
         @keyframes twistHelix {
-            to {
-                transform: translateY(var(--y-pos)) rotateY(calc(var(--base-rotation) + 360deg));
+            to { transform: translateY(var(--y-pos)) rotateY(calc(var(--base-rotation) + 360deg)); }
+        }
+
+        /* --- MEDIA QUERIES (Mobile) --- */
+        @media (max-width: 850px) {
+            /* Sur tablette/mobile, on pousse les hélices vers les bords */
+            .helix.left { left: -30px; }
+            .helix.right { right: -30px; }
+            
+            .container {
+                width: 85%; /* Laisser de la place aux hélices */
             }
-        }
-
-        /* Un léger flou global pour l'effet "lumière diffuse" */
-        .dna-container::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(circle, transparent 30%, var(--dark-bg) 80%);
-            pointer-events: none;
-        }
-        /* -------------------------------------------------- */
-
-
-        .container {
-            background: rgba(15, 15, 25, 0.75); /* Un peu plus transparent pour voir l'ADN */
-            padding: 3rem;
-            border-radius: 20px;
-            width: 90%;
-            max-width: 480px;
-            text-align: center;
-            border: 1px solid rgba(0, 255, 255, 0.2);
-            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5); /* Ombre plus sombre pour le contraste */
-            backdrop-filter: blur(10px); /* Flou d'arrière-plan réduit pour mieux voir l'animation */
-            position: relative;
-            z-index: 1;
         }
 
         @media (max-width: 480px) {
+            /* Sur petit mobile, on les pousse encore plus pour faire juste une bordure animée */
+            .helix { width: 60px; }
+            .helix.left { left: -25px; }
+            .helix.right { right: -25px; }
+            
             .container {
                 padding: 1.5rem;
-                width: 92%;
-                margin-top: 20px;
-                margin-bottom: 20px;
+                width: 88%;
             }
-            h1.neon-text {
-                font-size: 1.8rem;
-            }
-            /* Sur mobile, on réduit un peu la taille de l'hélice */
-            .helix { width: 90px; }
+            h1.neon-text { font-size: 1.8rem; }
+        }
+
+        /* ----------------------------------- */
+
+        .container {
+            background: rgba(10, 10, 18, 0.8);
+            padding: 3rem;
+            border-radius: 20px;
+            width: 500px; /* Largeur fixe pour desktop */
+            text-align: center;
+            border: 1px solid rgba(0, 255, 255, 0.15);
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            z-index: 10;
         }
 
         h1.neon-text {
@@ -147,7 +166,6 @@
             font-size: 0.9rem;
             letter-spacing: 1px;
             text-transform: uppercase;
-            text-shadow: 0 0 5px rgba(255, 0, 234, 0.5);
         }
 
         input {
@@ -183,8 +201,6 @@
             cursor: pointer;
             transition: all 0.4s;
             text-transform: uppercase;
-            position: relative;
-            overflow: hidden;
         }
 
         button:hover {
@@ -216,9 +232,8 @@
             border: 1px solid #ff0055;
             background: rgba(255, 0, 85, 0.1);
             color: #ff0055;
-            text-shadow: 0 0 10px rgba(255, 0, 85, 0.3);
         }
-
+        
         .invitation-box {
             margin-top: 15px;
             font-size: 0.95rem;
@@ -231,9 +246,9 @@
 </head>
 <body>
 
-<div class="dna-container">
-    <div class="helix" id="helix-loader">
-        </div>
+<div class="dna-stage">
+    <div class="helix left" id="helix-left"></div>
+    <div class="helix right" id="helix-right"></div>
 </div>
 
 <div class="container">
@@ -249,21 +264,27 @@
 </div>
 
 <script>
-    // Génération des tranches de l'ADN
-    const helixContainer = document.getElementById('helix-loader');
-    const numberOfSlices = 60; // Nombre de barreaux
+    // --- GÉNÉRATION DE L'ADN (Script Visuel) ---
+    function createHelix(elementId) {
+        const container = document.getElementById(elementId);
+        const numberOfSlices = 60; // Nombre de barreaux
 
-    for (let i = 0; i < numberOfSlices; i++) {
-        const slice = document.createElement('div');
-        slice.className = 'slice';
-        // On passe l'index 'i' comme variable CSS pour calculer la position et la rotation
-        slice.style.setProperty('--i', i);
-        helixContainer.appendChild(slice);
+        for (let i = 0; i < numberOfSlices; i++) {
+            const slice = document.createElement('div');
+            slice.className = 'slice';
+            slice.style.setProperty('--i', i);
+            container.appendChild(slice);
+        }
     }
-</script>
 
-<script>
-    // --- FONCTIONS UTILITAIRES ---
+    // Créer les deux hélices
+    createHelix('helix-left');
+    createHelix('helix-right');
+
+
+    // --- LOGIQUE MÉTIER (Script Formulaire) ---
+    
+    // (Fonctions utilitaires identiques)
     function normaliserAccents(texte) { return texte.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); }
     function nettoyerTexte(texte) { return texte.replace(/-/g, ' ').replace(/\s+/g, ' ').trim(); }
     function preparerPourComparaison(texte) { return normaliserAccents(nettoyerTexte(texte)).toUpperCase(); }
@@ -273,7 +294,6 @@
         return sansAccents.toUpperCase().split(' ');
     }
 
-    // --- LISTE DES MEMBRES (version nettoyée) ---
     const admissibles = [
         { nom: "ABOZAN", prenom: "PAULE MARIE VIANNEY" },
         { nom: "ADINGRA", prenom: "AFFOUA MARIE ELLA CHANTAL" },
@@ -310,6 +330,7 @@
         const prenomSaisiBrut = document.getElementById('firstName').value.trim();
         const nomSaisi = preparerPourComparaison(nomSaisiBrut);
         const prenomSaisi = preparerPourComparaison(prenomSaisiBrut);
+        
         const resultDiv = document.getElementById('result');
         const btn = document.querySelector('button');
 
@@ -362,7 +383,9 @@
     }
 
     document.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') checkAdmissibility();
+        if (e.key === 'Enter') {
+            checkAdmissibility();
+        }
     });
 </script>
 
