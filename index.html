@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portail ADN FAMILY - Système Animé</title>
+    <style>
+        :root {
+            --neon-cyan: #0ff;
+            --neon-pink: #f0f;
+            --dark-bg: #05050a;
+        }
+
+        body, html {
+            height: 100%;
+            margin: 0;
+            overflow: hidden; /* Empêche le scroll pendant l'animation */
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--dark-bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+        }
+
+        /* --- ANIMATION D'ARRIÈRE-PLAN --- */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at center, #101025 0%, #05050a 100%);
+        }
+
+        /* --- CONTENEUR PRINCIPAL --- */
+        .container {
+            background: rgba(10, 10, 20, 0.8);
+            padding: 2.5rem;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 450px;
+            text-align: center;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            box-shadow: 0 0 40px rgba(0, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            z-index: 10;
+            position: relative;
+        }
+
+        h1.neon-text {
+            font-size: 2.8rem;
+            margin: 0 0 10px 0;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            color: #fff;
+            text-shadow: 0 0 10px var(--neon-cyan), 0 0 20px var(--neon-cyan), 0 0 40px var(--neon-cyan);
+            animation: pulse 2s infinite alternate;
+        }
+
+        @keyframes pulse {
+            from { text-shadow: 0 0 10px var(--neon-cyan), 0 0 20px var(--neon-cyan); }
+            to { text-shadow: 0 0 15px var(--neon-cyan), 0 0 30px var(--neon-cyan), 0 0 50px var(--neon-cyan); }
+        }
+
+        .subtitle {
+            color: var(--neon-pink);
+            margin-bottom: 2rem;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        /* --- CHAMPS DE SAISIE --- */
+        input {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 16px;
+            color: var(--neon-cyan);
+            transition: 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--neon-pink);
+            box-shadow: 0 0 15px rgba(255, 0, 255, 0.2);
+            background: rgba(255, 0, 255, 0.05);
+        }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            margin-top: 15px;
+            background: transparent;
+            color: #fff;
+            border: 2px solid var(--neon-cyan);
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: 0.4s;
+        }
+
+        button:hover {
+            background: var(--neon-cyan);
+            color: #000;
+            box-shadow: 0 0 30px var(--neon-cyan);
+        }
+
+        /* --- RÉSULTATS --- */
+        #result {
+            margin-top: 25px;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .success { border: 1px solid #0f8; background: rgba(0, 255, 128, 0.1); color: #0f8; }
+        .error { border: 1px solid #f05; background: rgba(255, 0, 85, 0.1); color: #f05; }
+        
+        .invitation {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #ccc;
+            border-top: 1px dashed rgba(255,255,255,0.2);
+            padding-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+
+<div class="container">
+    <h1 class="neon-text">DNA FAMILY</h2>
+    <p class="subtitle">Analyse Séquentielle d'Admissibilité</p>
+    
+    <input type="text" id="lastName" placeholder="NOM">
+    <input type="text" id="firstName" placeholder="PRÉNOM">
+    
+    <button onclick="checkAdmissibility()">Scanner l'identité</button>
+
+    <div id="result"></div>
+</div>
+
+<script>
+    // --- ANIMATION DES PARTICULES (ADN STYLE) ---
+    const canvas = document.getElementById('bg-canvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+
+    function initCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+
+    class Particle {
+        constructor() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.size = Math.random() * 2 + 1;
+            this.speedX = Math.random() * 1 - 0.5;
+            this.speedY = Math.random() * 1 - 0.5;
+            this.color = Math.random() > 0.5 ? '#0ff' : '#f0f';
+        }
+        update() {
+            this.x += this.speedX;
+            this.y += this.speedY;
+            if (this.x > canvas.width) this.x = 0;
+            if (this.x < 0) this.x = canvas.width;
+            if (this.y > canvas.height) this.y = 0;
+            if (this.y < 0) this.y = canvas.height;
+        }
+        draw() {
+            ctx.fillStyle = this.color;
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = this.color;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+
+    function createParticles() {
+        for (let i = 0; i < 80; i++) {
+            particles.push(new Particle());
+        }
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => {
+            p.update();
+            p.draw();
+        });
+        requestAnimationFrame(animate);
+    }
+
+    window.addEventListener('resize', initCanvas);
+    initCanvas();
+    createParticles();
+    animate();
+
+    // --- LOGIQUE DE VÉRIFICATION ---
+    const admissibles = [
+        { nom: "KOUAME", prenom: "ARIEL" },
+        { nom: "KOUASSI", prenom: "JEAN MARC" },
+        { nom: "SILUE", prenom: "EBENEZER" },
+        { nom: "BOSSON", prenom: "ELI" },
+        { nom: "KOUAME", prenom: "ARIEL" },
+        { nom: "KOUASSI", prenom: "JEAN MARC" },
+        { nom: "SILUE", prenom: "EBENEZER" },
+        { nom: "BOSSON", prenom: "ELI" }
+    ];
+
+    function checkAdmissibility() {
+        const nomSaisi = document.getElementById('lastName').value.trim().toUpperCase();
+        const prenomSaisi = document.getElementById('firstName').value.trim().toLowerCase();
+        const resultDiv = document.getElementById('result');
+
+        if (!nomSaisi || !prenomSaisi) return;
+
+        const estAdmis = admissibles.find(p => {
+            const matchNom = p.nom.toUpperCase() === nomSaisi;
+            const listePrenomsDB = p.prenom.toLowerCase().split(' ');
+            const matchPrenom = listePrenomsDB.includes(prenomSaisi);
+            return matchNom && matchPrenom;
+        });
+
+        resultDiv.style.display = "block";
+        if (estAdmis) {
+            resultDiv.className = "success";
+            resultDiv.innerHTML = `
+                <strong>CORRESPONDANCE TROUVÉE</strong><br>
+                Bienvenue dans la famille, ${prenomSaisi.toUpperCase()}.
+                <div class="invitation">
+                    Vous êtes convié(e) lundi à passer les entretiens, dans une salle qui vous sera indiquée ultérieurement.
+                </div>
+            `;
+        } else {
+            resultDiv.className = "error";
+            resultDiv.innerHTML = "AUCUNE CORRESPONDANCE GÉNÉTIQUE.";
+        }
+    }
+</script>
+
+</body>
+</html>
