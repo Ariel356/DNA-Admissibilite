@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portail DNA FAMILY - Vérification</title>
     <style>
+        /* (Le CSS reste identique) */
         :root {
             --neon-cyan: #0ff;
             --neon-pink: #f0f;
@@ -14,7 +15,6 @@
         body {
             font-family: 'Segoe UI', sans-serif;
             background-color: var(--dark-bg);
-            /* Effet hélice ADN en arrière-plan */
             background-image: 
                 radial-gradient(circle at 20% 30%, rgba(0, 255, 255, 0.05) 0%, transparent 20%),
                 radial-gradient(circle at 80% 70%, rgba(255, 0, 255, 0.05) 0%, transparent 20%),
@@ -139,7 +139,7 @@
     <p class="subtitle">Analyseur de séquences d'admissibilité</p>
     
     <input type="text" id="lastName" placeholder="NOM DE FAMILLE">
-    <input type="text" id="firstName" placeholder="PRÉNOM">
+    <input type="text" id="firstName" placeholder="PRÉNOM COMPLET">
     
     <button onclick="checkAdmissibility()">Lancer le Séquençage</button>
 
@@ -147,30 +147,83 @@
 </div>
 
 <script>
-    // --- LISTE DES MEMBRES ---
-    const admissibles = [
-        { nom: "TRAORE", prenom: "Moussa Jean" }, 
-        { nom: "KOFFI", prenom: "Awa Marie" },
-        { nom: "SYLLA", prenom: "Oumar" },
-        { nom: "DIOP", prenom: "Fatou" },
-        { nom: "KOUASSI", prenom: "JEAN MARC"},
-        { nom: "KOUAME", prenom: "ARIEL DANIEL"}
+    // --- FONCTIONS UTILITAIRES ---
+    
+    // Normaliser les accents : transforme les caractères accentués en non-accentués
+    function normaliserAccents(texte) {
+        return texte.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+    
+    // Retirer les tirets et espaces superflus
+    function nettoyerTexte(texte) {
+        return texte.replace(/-/g, ' ').replace(/\s+/g, ' ').trim();
+    }
+    
+    // Préparer un texte pour comparaison
+    function preparerPourComparaison(texte) {
+        return normaliserAccents(nettoyerTexte(texte)).toUpperCase();
+    }
+    
+    // Séparer les prénoms en liste individuelle
+    function separerPrenoms(texte) {
+        const nettoye = nettoyerTexte(texte);
+        const sansAccents = normaliserAccents(nettoye);
+        return sansAccents.toUpperCase().split(' ');
+    }
 
+    // --- LISTE DES MEMBRES (version nettoyée) ---
+    const admissibles = [
+        { nom: "ABOZAN", prenom: "PAULE MARIE VIANNEY" },
+        { nom: "ADINGRA", prenom: "AFFOUA MARIE ELLA CHANTAL" },
+        { nom: "AKOBE", prenom: "DAGON LOUISE ALADIMA" },
+        { nom: "AKRE", prenom: "GOUEDJI FREDERIC ANGE DERANCE" },
+        { nom: "BEZEGO", prenom: "SANDI SAMIRA" },
+        { nom: "COULIBALY", prenom: "TCHELOUROUGO SARAH PRECILIA" },
+        { nom: "COULIBALY", prenom: "MARIAM LATIFA" },
+        { nom: "DOUDOU", prenom: "TABE AURELE JOSEE MARIE RAFAELLE" },
+        { nom: "KADJO", prenom: "AURELIE SAMIRAH MURIELLE" },
+        { nom: "KOTIA", prenom: "ADOUPO KASSIBRA ANGE ELOISE" },
+        { nom: "KOUAKOU", prenom: "NGUESSAN MARIA CAROLE" },
+        { nom: "KOUAME", prenom: "YANNICK COLOMBE" },
+        { nom: "KOUASSI", prenom: "KOFFI CHRIST ABIMAEL" },
+        { nom: "KOUASSI", prenom: "KOFFI CHRIST ABIMAEL" },
+        { nom: "KOULAI", prenom: "ADELPHE MARIE MARCELLE" },
+        { nom: "KPAI", prenom: "KEASSA JEMIMA SEPHORA" },
+        { nom: "LABA", prenom: "LAURIS JANICK GOWA" },
+        { nom: "LIDAH LOROU", prenom: "ALVIN EMMANUEL" },
+        { nom: "NGUESSAN", prenom: "ARNOLD CHRIST ENOC" },
+        { nom: "OUATTARA", prenom: "DAHIGUE NOURYATE" },
+        { nom: "OURA", prenom: "AMENAN MARIE THERESE" },
+        { nom: "SANGARE", prenom: "ZEINABOU" },
+        { nom: "TANO", prenom: "NDA SAPHIR AXELLE ROXANE" },
+        { nom: "TOYO", prenom: "ABDOUL AZIZ" },
+        { nom: "TRAORE", prenom: "KHADIDIA IMANE ALISHA" },
+        { nom: "YAO", prenom: "KEMOUEL EPHREM MARY" },
+        { nom: "YAO", prenom: "AMOIN RENE ANELLE MALIKA" },
+        { nom: "ZOROM", prenom: "AICHATOU" }
     ];
 
     function checkAdmissibility() {
-        const nomSaisi = document.getElementById('lastName').value.trim().toUpperCase();
-        const prenomSaisi = document.getElementById('firstName').value.trim().toLowerCase();
+        // Récupérer les valeurs saisies
+        const nomSaisiBrut = document.getElementById('lastName').value.trim();
+        const prenomSaisiBrut = document.getElementById('firstName').value.trim();
+        
+        // Nettoyer et normaliser les saisies
+        const nomSaisi = preparerPourComparaison(nomSaisiBrut);
+        const prenomSaisi = preparerPourComparaison(prenomSaisiBrut);
+        
         const resultDiv = document.getElementById('result');
         const btn = document.querySelector('button');
 
-        if (!nomSaisi || !prenomSaisi) {
+        // Validation
+        if (!nomSaisiBrut || !prenomSaisiBrut) {
             resultDiv.style.display = "block";
             resultDiv.className = "error";
-            resultDiv.innerHTML = "❌ Données manquantes pour l'analyse.";
+            resultDiv.innerHTML = "❌ Veuillez remplir tous les champs.";
             return;
         }
 
+        // Animation du bouton
         btn.innerHTML = "SÉQUENÇAGE EN COURS...";
         btn.disabled = true;
 
@@ -178,17 +231,24 @@
             btn.innerHTML = "Lancer le Séquençage";
             btn.disabled = false;
 
-            // --- LOGIQUE DE RECHERCHE AMÉLIORÉE ---
-            const estAdmis = admissibles.find(p => {
-                const matchNom = p.nom.toUpperCase() === nomSaisi;
+            // Recherche dans la liste - VERSION CORRIGÉE
+            const estAdmis = admissibles.find(personne => {
+                // 1. Comparer les noms (doit être exact)
+                if (personne.nom !== nomSaisi) {
+                    return false;
+                }
                 
-                // On transforme les prénoms de la DB en liste (ex: "Moussa Jean" -> ["moussa", "jean"])
-                const listePrenomsDB = p.prenom.toLowerCase().split(' ');
+                // 2. Séparer les prénoms de la base de données
+                const prenomsDB = separerPrenoms(personne.prenom);
                 
-                // On vérifie si le prénom saisi par l'utilisateur est présent dans cette liste
-                const matchPrenom = listePrenomsDB.includes(prenomSaisi);
+                // 3. Séparer le prénom saisi par l'utilisateur
+                const prenomsSaisis = separerPrenoms(prenomSaisiBrut);
                 
-                return matchNom && matchPrenom;
+                // 4. Pour chaque prénom saisi, vérifier s'il est présent dans la liste DB
+                // EXIGENCE : TOUS les prénoms saisis doivent être trouvés dans la liste DB
+                return prenomsSaisis.every(prenomS => 
+                    prenomsDB.some(prenomDB => prenomDB === prenomS)
+                );
             });
 
             resultDiv.style.display = "block";
@@ -197,7 +257,7 @@
                 resultDiv.className = "success";
                 resultDiv.innerHTML = `
                     <strong>✅ CORRESPONDANCE GÉNÉTIQUE TROUVÉE</strong><br>
-                    Félicitations <strong>${nomSaisi} ${prenomSaisi.charAt(0).toUpperCase() + prenomSaisi.slice(1)}</strong> !<br>
+                    Félicitations <strong>${nomSaisiBrut.toUpperCase()} ${prenomSaisiBrut.charAt(0).toUpperCase() + prenomSaisiBrut.slice(1).toLowerCase()}</strong> !<br>
                     Vous êtes officiellement admissible à DNA FAMILY.<br>
                     <div class="invitation-box">
                         Vous êtes convié(e) lundi à passer les entretiens, dans une salle qui vous sera indiquée ultérieurement.
@@ -205,10 +265,24 @@
                 `;
             } else {
                 resultDiv.className = "error";
-                resultDiv.innerHTML = "❌ <strong>AUCUNE CORRESPONDANCE</strong><br>Votre profil n'a pas été identifié dans la DNA FAMILY.";
+                resultDiv.innerHTML = `
+                    ❌ <strong>AUCUNE CORRESPONDANCE</strong><br>
+                    Votre profil n'a pas été identifié dans la DNA FAMILY.<br>
+                    <small style="opacity:0.8;margin-top:10px;display:block">
+                        Note : Recherche exacte requise<br>
+                        Saisissez le prénom complet
+                    </small>
+                `;
             }
         }, 1200);
     }
+
+    // Permettre la validation avec la touche Entrée
+    document.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            checkAdmissibility();
+        }
+    });
 </script>
 
 </body>
