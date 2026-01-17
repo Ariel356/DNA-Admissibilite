@@ -6,112 +6,131 @@
     <title>Portail DNA FAMILY - Vérification</title>
     <style>
         :root {
-            --neon-cyan: #0ff;
-            --neon-pink: rgb(255, 0, 255);
+            /* Couleurs légèrement ajustées pour le mélange néon */
+            --neon-cyan: rgb(0, 247, 255);
+            --neon-pink: rgb(255, 0, 234);
             --dark-bg: #080810;
         }
 
         body {
             font-family: 'Segoe UI', sans-serif;
             background-color: var(--dark-bg);
-            /* Fond statique légèrement simplifié pour laisser place à l'animation */
-            background-image: 
-                radial-gradient(circle at 50% 50%, rgba(0, 255, 255, 0.03) 0%, transparent 50%),
-                repeating-linear-gradient(45deg, transparent, transparent 25px, rgba(0, 255, 255, 0.01) 25px, rgba(0, 255, 255, 0.01) 26px);
+            /* Fond statique très subtil */
+            background-image: radial-gradient(circle at 50% 50%, rgba(15, 15, 25, 1) 0%, #000 100%);
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             margin: 0;
             color: #fff;
-            overflow-x: hidden; /* Empêche le scroll horizontal dû aux animations */
+            overflow: hidden; /* Important pour la 3D */
+            perspective: 1000px; /* Donne la profondeur 3D à toute la scène */
         }
 
-        /* --- NOUVEAU : Animation ADN en arrière-plan --- */
-        .dna-animation-bg {
+        /* --- NOUVELLE ANIMATION DOUBLE HÉLICE 3D --- */
+        .dna-container {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: -1; /* Place l'animation derrière le formulaire */
-            pointer-events: none;
-            perspective: 1000px;
-        }
-
-        .dna-strand {
-            position: absolute;
-            width: 60px;
-            height: 200%; /* Plus grand que l'écran pour la rotation continue */
-            top: -50%;
-            left: 50%;
-            /* Création des barreaux de l'échelle ADN avec des dégradés */
-            background: repeating-linear-gradient(
-                90deg,
-                transparent 0%,
-                transparent 40%,
-                var(--neon-cyan) 40%,
-                var(--neon-cyan) 60%,
-                transparent 60%,
-                transparent 100%
-            );
-            background-size: 100% 40px; /* Espacement des barreaux */
-            opacity: 0.2;
+            z-index: -1; /* Derrière le formulaire */
+            display: flex;
+            justify-content: center;
+            align-items: center;
             transform-style: preserve-3d;
-            animation: rotateDNA 20s linear infinite;
         }
 
-        /* Le deuxième brin, décalé et d'une couleur différente */
-        .dna-strand.second {
-            left: calc(50% - 30px); /* Léger décalage horizontal */
-            background: repeating-linear-gradient(
-                90deg,
-                transparent 0%,
-                transparent 40%,
-                var(--neon-pink) 40%,
-                var(--neon-pink) 60%,
-                transparent 60%,
-                transparent 100%
-            );
-            background-size: 100% 40px;
-            animation-delay: -10s; /* Décalage de l'animation pour créer l'effet d'hélice */
-            opacity: 0.15;
+        .helix {
+            position: relative;
+            width: 120px; /* Largeur de l'échelle ADN */
+            height: 800px; /* Hauteur totale de la structure */
+            transform-style: preserve-3d;
+            /* Inclinaison globale pour mieux voir la 3D */
+            transform: rotateX(20deg) rotateZ(-10deg);
         }
 
-        @keyframes rotateDNA {
-            0% { transform: translate(-50%, 0) rotateY(0deg) rotateX(0deg); }
-            100% { transform: translate(-50%, -50%) rotateY(360deg) rotateX(360deg); }
+        /* Chaque "tranche" horizontale de l'ADN (une paire de bases) */
+        .slice {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 3px; /* Très fin */
+            /* Le dégradé crée le barreau central, transparent au milieu */
+            background: linear-gradient(90deg, 
+                var(--neon-cyan) 0%, 
+                rgba(0, 247, 255, 0.2) 20%,
+                transparent 40%, transparent 60%,
+                rgba(255, 0, 234, 0.2) 80%,
+                var(--neon-pink) 100%);
+            
+            /* Positionnement vertical et torsion initiale basés sur l'index CSS (défini en JS) */
+            --y-pos: calc((var(--i) - 30) * 12px); /* Espacement vertical */
+            --base-rotation: calc(var(--i) * 18deg); /* Torsion progressive */
+            
+            transform: translateY(var(--y-pos)) rotateY(var(--base-rotation));
+            animation: twistHelix 8s linear infinite;
+        }
+
+        /* Les "billes" brillantes aux extrémités des brins */
+        .slice::before, .slice::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            top: -2.5px;
+            box-shadow: 0 0 10px currentColor;
+        }
+        .slice::before { left: -4px; background: var(--neon-cyan); color: var(--neon-cyan); }
+        .slice::after { right: -4px; background: var(--neon-pink); color: var(--neon-pink); }
+
+        /* L'animation fait tourner chaque tranche de 360deg en plus de sa torsion initiale */
+        @keyframes twistHelix {
+            to {
+                transform: translateY(var(--y-pos)) rotateY(calc(var(--base-rotation) + 360deg));
+            }
+        }
+
+        /* Un léger flou global pour l'effet "lumière diffuse" */
+        .dna-container::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle, transparent 30%, var(--dark-bg) 80%);
+            pointer-events: none;
         }
         /* -------------------------------------------------- */
 
 
         .container {
-            background: rgba(15, 15, 25, 0.85);
+            background: rgba(15, 15, 25, 0.75); /* Un peu plus transparent pour voir l'ADN */
             padding: 3rem;
             border-radius: 20px;
             width: 90%;
             max-width: 480px;
             text-align: center;
-            border: 1px solid rgba(0, 255, 255, 0.3);
-            box-shadow: 0 0 30px rgba(0, 255, 255, 0.1);
-            backdrop-filter: blur(15px);
-            position: relative; /* S'assure que le contenu reste au-dessus */
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5); /* Ombre plus sombre pour le contraste */
+            backdrop-filter: blur(10px); /* Flou d'arrière-plan réduit pour mieux voir l'animation */
+            position: relative;
             z-index: 1;
         }
 
-        /* --- MODIFICATION : Media Query pour "dézoomer" sur mobile --- */
         @media (max-width: 480px) {
             .container {
-                padding: 1.5rem; /* Beaucoup moins de remplissage sur petit écran */
-                width: 92%; /* Un peu plus large */
+                padding: 1.5rem;
+                width: 92%;
                 margin-top: 20px;
                 margin-bottom: 20px;
             }
             h1.neon-text {
-                font-size: 1.8rem; /* Titre légèrement plus petit */
+                font-size: 1.8rem;
             }
+            /* Sur mobile, on réduit un peu la taille de l'hélice */
+            .helix { width: 90px; }
         }
-        /* --------------------------------------------------------- */
 
         h1.neon-text {
             font-size: 2.5rem;
@@ -128,6 +147,7 @@
             font-size: 0.9rem;
             letter-spacing: 1px;
             text-transform: uppercase;
+            text-shadow: 0 0 5px rgba(255, 0, 234, 0.5);
         }
 
         input {
@@ -163,6 +183,8 @@
             cursor: pointer;
             transition: all 0.4s;
             text-transform: uppercase;
+            position: relative;
+            overflow: hidden;
         }
 
         button:hover {
@@ -194,6 +216,7 @@
             border: 1px solid #ff0055;
             background: rgba(255, 0, 85, 0.1);
             color: #ff0055;
+            text-shadow: 0 0 10px rgba(255, 0, 85, 0.3);
         }
 
         .invitation-box {
@@ -208,9 +231,9 @@
 </head>
 <body>
 
-<div class="dna-animation-bg">
-    <div class="dna-strand"></div>
-    <div class="dna-strand second"></div>
+<div class="dna-container">
+    <div class="helix" id="helix-loader">
+        </div>
 </div>
 
 <div class="container">
@@ -226,24 +249,24 @@
 </div>
 
 <script>
+    // Génération des tranches de l'ADN
+    const helixContainer = document.getElementById('helix-loader');
+    const numberOfSlices = 60; // Nombre de barreaux
+
+    for (let i = 0; i < numberOfSlices; i++) {
+        const slice = document.createElement('div');
+        slice.className = 'slice';
+        // On passe l'index 'i' comme variable CSS pour calculer la position et la rotation
+        slice.style.setProperty('--i', i);
+        helixContainer.appendChild(slice);
+    }
+</script>
+
+<script>
     // --- FONCTIONS UTILITAIRES ---
-    
-    // Normaliser les accents : transforme les caractères accentués en non-accentués
-    function normaliserAccents(texte) {
-        return texte.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    }
-    
-    // Retirer les tirets et espaces superflus
-    function nettoyerTexte(texte) {
-        return texte.replace(/-/g, ' ').replace(/\s+/g, ' ').trim();
-    }
-    
-    // Préparer un texte pour comparaison
-    function preparerPourComparaison(texte) {
-        return normaliserAccents(nettoyerTexte(texte)).toUpperCase();
-    }
-    
-    // Séparer les prénoms en liste individuelle
+    function normaliserAccents(texte) { return texte.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); }
+    function nettoyerTexte(texte) { return texte.replace(/-/g, ' ').replace(/\s+/g, ' ').trim(); }
+    function preparerPourComparaison(texte) { return normaliserAccents(nettoyerTexte(texte)).toUpperCase(); }
     function separerPrenoms(texte) {
         const nettoye = nettoyerTexte(texte);
         const sansAccents = normaliserAccents(nettoye);
@@ -283,18 +306,13 @@
     ];
 
     function checkAdmissibility() {
-        // Récupérer les valeurs saisies
         const nomSaisiBrut = document.getElementById('lastName').value.trim();
         const prenomSaisiBrut = document.getElementById('firstName').value.trim();
-        
-        // Nettoyer et normaliser les saisies
         const nomSaisi = preparerPourComparaison(nomSaisiBrut);
         const prenomSaisi = preparerPourComparaison(prenomSaisiBrut);
-        
         const resultDiv = document.getElementById('result');
         const btn = document.querySelector('button');
 
-        // Validation
         if (!nomSaisiBrut || !prenomSaisiBrut) {
             resultDiv.style.display = "block";
             resultDiv.className = "error";
@@ -302,7 +320,6 @@
             return;
         }
 
-        // Animation du bouton
         btn.innerHTML = "SÉQUENÇAGE EN COURS...";
         btn.disabled = true;
 
@@ -310,24 +327,11 @@
             btn.innerHTML = "Lancer le Séquençage";
             btn.disabled = false;
 
-            // Recherche dans la liste - VERSION CORRIGÉE
             const estAdmis = admissibles.find(personne => {
-                // 1. Comparer les noms (doit être exact)
-                if (personne.nom !== nomSaisi) {
-                    return false;
-                }
-                
-                // 2. Séparer les prénoms de la base de données
+                if (personne.nom !== nomSaisi) return false;
                 const prenomsDB = separerPrenoms(personne.prenom);
-                
-                // 3. Séparer le prénom saisi par l'utilisateur
                 const prenomsSaisis = separerPrenoms(prenomSaisiBrut);
-                
-                // 4. Pour chaque prénom saisi, vérifier s'il est présent dans la liste DB
-                // EXIGENCE : TOUS les prénoms saisis doivent être trouvés dans la liste DB
-                return prenomsSaisis.every(prenomS => 
-                    prenomsDB.some(prenomDB => prenomDB === prenomS)
-                );
+                return prenomsSaisis.every(prenomS => prenomsDB.some(prenomDB => prenomDB === prenomS));
             });
 
             resultDiv.style.display = "block";
@@ -357,11 +361,8 @@
         }, 1200);
     }
 
-    // Permettre la validation avec la touche Entrée
     document.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            checkAdmissibility();
-        }
+        if (e.key === 'Enter') checkAdmissibility();
     });
 </script>
 
