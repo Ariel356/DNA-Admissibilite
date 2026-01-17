@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portail ADN FAMILY - Vérification</title>
+    <title>Portail DNA FAMILY - Vérification</title>
     <style>
         :root {
             --neon-cyan: #0ff;
@@ -196,14 +196,14 @@
                 resultDiv.innerHTML = `
                     <strong>✅ CORRESPONDANCE GÉNÉTIQUE TROUVÉE</strong><br>
                     Félicitations <strong>${nomSaisi} ${prenomSaisi.charAt(0).toUpperCase() + prenomSaisi.slice(1)}</strong> !<br>
-                    Vous êtes officiellement admissible à ADN FAMILY.<br>
+                    Vous êtes officiellement admissible à DNA FAMILY.<br>
                     <div class="invitation-box">
                         Vous êtes convié(e) lundi à passer les entretiens, dans une salle qui vous sera indiquée ultérieurement.
                     </div>
                 `;
             } else {
                 resultDiv.className = "error";
-                resultDiv.innerHTML = "❌ <strong>AUCUNE CORRESPONDANCE</strong><br>Votre profil n'a pas été identifié dans la ADN FAMILY.";
+                resultDiv.innerHTML = "❌ <strong>AUCUNE CORRESPONDANCE</strong><br>Votre profil n'a pas été identifié dans la DNA FAMILY.";
             }
         }, 1200);
     }
