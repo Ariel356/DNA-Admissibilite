@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portail DNA FAMILY - Vérification</title>
+
     <style>
         :root {
             --neon-cyan: rgb(0, 247, 255);
@@ -14,7 +15,6 @@
         body {
             font-family: 'Segoe UI', sans-serif;
             background-color: var(--dark-bg);
-            /* Fond sombre avec vignetage pour mettre l'accent au centre */
             background-image: radial-gradient(circle at 50% 50%, #1a1a2e 0%, #000 100%);
             display: flex;
             justify-content: center;
@@ -22,78 +22,74 @@
             min-height: 100vh;
             margin: 0;
             color: #fff;
-            overflow: hidden; /* Important : cache ce qui dépasse */
+            overflow: hidden;
             perspective: 1000px;
         }
 
-        /* --- CONTENEUR GLOBAL DES ANIMATIONS --- */
+        /* ===== ADN STAGE ===== */
         .dna-stage {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            inset: 0;
             z-index: -1;
             pointer-events: none;
         }
 
-        /* Configuration de base d'une hélice */
         .helix {
             position: absolute;
-            top: 50%; /* Centré verticalement */
-            width: 80px; 
-            height: 900px; /* Assez haut pour couvrir l'écran */
+            top: 50%;
+            width: 80px;
+            height: 900px;
             transform-style: preserve-3d;
         }
 
-        /* Positionnement Gauche */
         .helix.left {
             left: 5%;
             transform: translateY(-50%) rotateX(15deg) rotateY(10deg);
         }
 
-        /* Positionnement Droite */
         .helix.right {
             right: 5%;
-            transform: translateY(-50%) rotateX(15deg) rotateY(-10deg); /* Inclinaison opposée */
+            transform: translateY(-50%) rotateX(15deg) rotateY(-10deg);
         }
 
-        /* --- TRANCHES (BARREAUX) DE L'ADN --- */
         .slice {
             position: absolute;
             top: 50%;
             left: 0;
             width: 100%;
             height: 3px;
-            /* Couleur par défaut (Gauche) : Cyan vers Rose */
-            background: linear-gradient(90deg, 
-                var(--neon-cyan) 0%, 
-                rgba(0, 247, 255, 0.2) 20%,
-                transparent 45%, transparent 55%, /* Centre transparent */
-                rgba(255, 0, 234, 0.2) 80%,
-                var(--neon-pink) 100%);
-            
-            --y-pos: calc((var(--i) - 30) * 14px); /* Espacement vertical */
-            --base-rotation: calc(var(--i) * 20deg); /* Torsion */
-            
+
+            background: linear-gradient(90deg,
+                var(--neon-cyan) 0%,
+                rgba(0,247,255,0.2) 20%,
+                transparent 45%,
+                transparent 55%,
+                rgba(255,0,234,0.2) 80%,
+                var(--neon-pink) 100%
+            );
+
+            /* 🔧 COMPACT POUR MOBILE */
+            --y-pos: calc((var(--i) - 30) * 9px);
+            --base-rotation: calc(var(--i) * 20deg);
+
             transform: translateY(var(--y-pos)) rotateY(var(--base-rotation));
             animation: twistHelix 6s linear infinite;
         }
 
-        /* Variation pour l'hélice de Droite (Couleurs inversées et rotation inverse) */
         .helix.right .slice {
-            animation-direction: reverse; /* Tourne dans l'autre sens */
-            /* Rose vers Cyan */
-            background: linear-gradient(90deg, 
-                var(--neon-pink) 0%, 
-                rgba(255, 0, 234, 0.2) 20%,
-                transparent 45%, transparent 55%,
-                rgba(0, 247, 255, 0.2) 80%,
-                var(--neon-cyan) 100%);
+            animation-direction: reverse;
+            background: linear-gradient(90deg,
+                var(--neon-pink) 0%,
+                rgba(255,0,234,0.2) 20%,
+                transparent 45%,
+                transparent 55%,
+                rgba(0,247,255,0.2) 80%,
+                var(--neon-cyan) 100%
+            );
         }
-        
-        /* Billes aux extrémités (Gauche) */
-        .slice::before, .slice::after {
+
+        .slice::before,
+        .slice::after {
             content: '';
             position: absolute;
             width: 6px;
@@ -102,90 +98,57 @@
             top: -1.5px;
             box-shadow: 0 0 8px currentColor;
         }
-        .slice::before { left: -3px; background: var(--neon-cyan); color: var(--neon-cyan); }
-        .slice::after { right: -3px; background: var(--neon-pink); color: var(--neon-pink); }
 
-        /* Billes aux extrémités (Droite - Inversion des couleurs) */
-        .helix.right .slice::before { background: var(--neon-pink); color: var(--neon-pink); }
-        .helix.right .slice::after { background: var(--neon-cyan); color: var(--neon-cyan); }
+        .slice::before {
+            left: -3px;
+            background: var(--neon-cyan);
+        }
+
+        .slice::after {
+            right: -3px;
+            background: var(--neon-pink);
+        }
+
+        .helix.right .slice::before { background: var(--neon-pink); }
+        .helix.right .slice::after  { background: var(--neon-cyan); }
 
         @keyframes twistHelix {
-            to { transform: translateY(var(--y-pos)) rotateY(calc(var(--base-rotation) + 360deg)); }
-        }
-
-        /* --- MEDIA QUERIES (Mobile) --- */
-        @media (max-width: 850px) {
-            /* Sur tablette/mobile, on pousse les hélices vers les bords */
-            .helix.left { left: -30px; }
-            .helix.right { right: -30px; }
-            
-            .container {
-                width: 85%; /* Laisser de la place aux hélices */
+            to {
+                transform: translateY(var(--y-pos))
+                           rotateY(calc(var(--base-rotation) + 360deg));
             }
         }
 
-        @media (max-width: 480px) {
-            /* Sur petit mobile, on les pousse encore plus pour faire juste une bordure animée */
-            .helix { width: 60px; }
-            .helix.left { left: -25px; }
-            .helix.right { right: -25px; }
-            
-            .container {
-                padding: 1.5rem;
-                width: 88%;
-            }
-            h1.neon-text { font-size: 1.8rem; }
-        }
-
-        /* ----------------------------------- */
-
+        /* ===== CONTENEUR ===== */
         .container {
-            background: rgba(10, 10, 18, 0.8);
+            background: rgba(10,10,18,0.8);
             padding: 3rem;
             border-radius: 20px;
-            width: 500px; /* Largeur fixe pour desktop */
+            width: 500px;
             text-align: center;
-            border: 1px solid rgba(0, 255, 255, 0.15);
-            box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(0,255,255,0.15);
             backdrop-filter: blur(8px);
             z-index: 10;
         }
 
         h1.neon-text {
             font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-            text-transform: uppercase;
-            letter-spacing: 4px;
-            color: #fff;
-            text-shadow: 0 0 10px var(--neon-cyan), 0 0 20px var(--neon-cyan);
+            text-shadow: 0 0 10px var(--neon-cyan);
         }
 
         .subtitle {
             color: var(--neon-pink);
             margin-bottom: 2rem;
-            font-size: 0.9rem;
-            letter-spacing: 1px;
-            text-transform: uppercase;
         }
 
         input {
             width: 100%;
             padding: 16px;
             margin: 12px 0;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.2);
             border-radius: 10px;
-            box-sizing: border-box;
-            font-size: 16px;
             color: #fff;
-            transition: 0.3s;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: var(--neon-cyan);
-            background: rgba(0, 255, 255, 0.05);
-            box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
         }
 
         button {
@@ -193,20 +156,16 @@
             padding: 16px;
             margin-top: 20px;
             background: transparent;
-            color: #fff;
             border: 2px solid var(--neon-cyan);
             border-radius: 10px;
+            color: #fff;
             font-size: 18px;
-            font-weight: bold;
             cursor: pointer;
-            transition: all 0.4s;
-            text-transform: uppercase;
         }
 
         button:hover {
             background: var(--neon-cyan);
             color: var(--dark-bg);
-            box-shadow: 0 0 40px var(--neon-cyan);
         }
 
         #result {
@@ -214,36 +173,41 @@
             padding: 20px;
             border-radius: 12px;
             display: none;
-            font-size: 1.1rem;
-            line-height: 1.5;
-            animation: slideUp 0.5s ease-out;
         }
 
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-        .success { 
+        .success {
             border: 1px solid #00ff88;
-            background: rgba(0, 255, 136, 0.1);
+            background: rgba(0,255,136,0.1);
             color: #00ff88;
-            text-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
         }
 
-        .error { 
+        .error {
             border: 1px solid #ff0055;
-            background: rgba(255, 0, 85, 0.1);
+            background: rgba(255,0,85,0.1);
             color: #ff0055;
         }
-        
-        .invitation-box {
-            margin-top: 15px;
-            font-size: 0.95rem;
-            color: #fff;
-            border-top: 1px solid rgba(0, 255, 136, 0.3);
-            padding-top: 15px;
-            font-style: italic;
+
+        /* 📱 MOBILE */
+        @media (max-width: 480px) {
+            .helix {
+                width: 50px;
+                height: 520px;
+            }
+            .helix.left  { left: -15px; }
+            .helix.right { right: -15px; }
+
+            .container {
+                width: 90%;
+                padding: 1.4rem;
+            }
+
+            h1.neon-text {
+                font-size: 1.7rem;
+            }
         }
     </style>
 </head>
+
 <body>
 
 <div class="dna-stage">
@@ -254,22 +218,19 @@
 <div class="container">
     <h1 class="neon-text">DNA FAMILY</h1>
     <p class="subtitle">Analyseur de séquences d'admissibilité</p>
-    
-    <input type="text" id="lastName" placeholder="NOM DE FAMILLE">
-    <input type="text" id="firstName" placeholder="PRÉNOM COMPLET">
-    
-    <button onclick="checkAdmissibility()">Lancer le Séquençage</button>
 
+    <input id="lastName" placeholder="NOM DE FAMILLE">
+    <input id="firstName" placeholder="PRÉNOM COMPLET">
+
+    <button onclick="checkAdmissibility()">Lancer le Séquençage</button>
     <div id="result"></div>
 </div>
 
 <script>
-    // --- GÉNÉRATION DE L'ADN (Script Visuel) ---
-    function createHelix(elementId) {
-        const container = document.getElementById(elementId);
-        const numberOfSlices = 60; // Nombre de barreaux
-
-        for (let i = 0; i < numberOfSlices; i++) {
+    /* ===== ADN ===== */
+    function createHelix(id) {
+        const container = document.getElementById(id);
+        for (let i = 0; i < 60; i++) {
             const slice = document.createElement('div');
             slice.className = 'slice';
             slice.style.setProperty('--i', i);
@@ -277,24 +238,16 @@
         }
     }
 
-    // Créer les deux hélices
     createHelix('helix-left');
     createHelix('helix-right');
 
+    /* ===== LOGIQUE MÉTIER ORIGINALE ===== */
+    function normaliserAccents(t){return t.normalize("NFD").replace(/[\u0300-\u036f]/g,"")}
+    function nettoyerTexte(t){return t.replace(/-/g," ").replace(/\s+/g," ").trim()}
+    function preparerPourComparaison(t){return normaliserAccents(nettoyerTexte(t)).toUpperCase()}
+    function separerPrenoms(t){return preparerPourComparaison(t).split(" ")}
 
-    // --- LOGIQUE MÉTIER (Script Formulaire) ---
-    
-    // (Fonctions utilitaires identiques)
-    function normaliserAccents(texte) { return texte.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); }
-    function nettoyerTexte(texte) { return texte.replace(/-/g, ' ').replace(/\s+/g, ' ').trim(); }
-    function preparerPourComparaison(texte) { return normaliserAccents(nettoyerTexte(texte)).toUpperCase(); }
-    function separerPrenoms(texte) {
-        const nettoye = nettoyerTexte(texte);
-        const sansAccents = normaliserAccents(nettoye);
-        return sansAccents.toUpperCase().split(' ');
-    }
-
-    const admissibles = [
+const admissibles = [
         { nom: "ABOZAN", prenom: "PAULE MARIE VIANNEY" },
         { nom: "ADINGRA", prenom: "AFFOUA MARIE ELLA CHANTAL" },
         { nom: "AKOBE", prenom: "DAGON LOUISE ALADIMA" },
@@ -326,67 +279,32 @@
     ];
 
     function checkAdmissibility() {
-        const nomSaisiBrut = document.getElementById('lastName').value.trim();
-        const prenomSaisiBrut = document.getElementById('firstName').value.trim();
-        const nomSaisi = preparerPourComparaison(nomSaisiBrut);
-        const prenomSaisi = preparerPourComparaison(prenomSaisiBrut);
-        
-        const resultDiv = document.getElementById('result');
-        const btn = document.querySelector('button');
+        const nom = preparerPourComparaison(lastName.value);
+        const prenom = preparerPourComparaison(firstName.value);
+        const result = document.getElementById("result");
 
-        if (!nomSaisiBrut || !prenomSaisiBrut) {
-            resultDiv.style.display = "block";
-            resultDiv.className = "error";
-            resultDiv.innerHTML = "❌ Veuillez remplir tous les champs.";
+        if(!nom || !prenom){
+            result.style.display="block";
+            result.className="error";
+            result.textContent="❌ Veuillez remplir tous les champs.";
             return;
         }
 
-        btn.innerHTML = "SÉQUENÇAGE EN COURS...";
-        btn.disabled = true;
+        const ok = admissibles.find(p =>
+            p.nom === nom &&
+            separerPrenoms(prenom).every(pr => separerPrenoms(p.prenom).includes(pr))
+        );
 
-        setTimeout(() => {
-            btn.innerHTML = "Lancer le Séquençage";
-            btn.disabled = false;
+        result.style.display="block";
 
-            const estAdmis = admissibles.find(personne => {
-                if (personne.nom !== nomSaisi) return false;
-                const prenomsDB = separerPrenoms(personne.prenom);
-                const prenomsSaisis = separerPrenoms(prenomSaisiBrut);
-                return prenomsSaisis.every(prenomS => prenomsDB.some(prenomDB => prenomDB === prenomS));
-            });
-
-            resultDiv.style.display = "block";
-
-            if (estAdmis) {
-                resultDiv.className = "success";
-                resultDiv.innerHTML = `
-                    <strong>✅ CORRESPONDANCE GÉNÉTIQUE TROUVÉE</strong><br>
-                    Félicitations <strong>${nomSaisiBrut.toUpperCase()} ${prenomSaisiBrut.charAt(0).toUpperCase() + prenomSaisiBrut.slice(1).toLowerCase()}</strong> !<br>
-                    Vous êtes officiellement admissible à DNA FAMILY.<br>
-                    <div class="invitation-box">
-                        Vous êtes convié(e) lundi à passer les entretiens, dans une salle qui vous sera indiquée ultérieurement.
-                        Merci de bien vouloir transmettre votre adresse e‑mail au numéro WhatsApp +225 05 8485 4100 afin de recevoir la suite des informations
-                    </div>
-                `;
-            } else {
-                resultDiv.className = "error";
-                resultDiv.innerHTML = `
-                    ❌ <strong>AUCUNE CORRESPONDANCE</strong><br>
-                    Votre profil n'a pas été identifié dans la DNA FAMILY.<br>
-                    <small style="opacity:0.8;margin-top:10px;display:block">
-                        Note : Recherche exacte requise<br>
-                        Saisissez le prénom complet
-                    </small>
-                `;
-            }
-        }, 1200);
-    }
-
-    document.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            checkAdmissibility();
+        if(ok){
+            result.className="success";
+            result.innerHTML="✅ Correspondance génétique trouvée";
+        } else {
+            result.className="error";
+            result.innerHTML="❌ Aucune correspondance trouvée";
         }
-    });
+    }
 </script>
 
 </body>
