@@ -23,47 +23,51 @@
             background-image: radial-gradient(circle at 50% 50%, rgba(15, 15, 25, 1) 0%, #000 100%);
             display: flex;
             justify-content: center;
-            align-items: flex-start; /* Changé de center à flex-start */
+            align-items: flex-start;
             min-height: 100vh;
             margin: 0;
             color: #fff;
             overflow-x: hidden;
-            overflow-y: auto; /* Permet le défilement vertical */
-            perspective: 1000px; /* Donne la profondeur 3D à toute la scène */
-            padding: 20px; /* Ajouté pour l'espacement */
+            overflow-y: auto;
+            perspective: 1000px;
+            padding: 20px;
         }
 
-        /* --- NOUVELLE ANIMATION DOUBLE HÉLICE 3D --- */
+        /* --- ANIMATION DOUBLE HÉLICE 3D CORRIGÉE --- */
         .dna-container {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
-            height: 100%;
-            z-index: -1; /* Derrière le formulaire */
+            height: 100vh; /* Hauteur de la vue seulement */
+            z-index: -1;
             display: flex;
             justify-content: center;
             align-items: center;
             transform-style: preserve-3d;
+            pointer-events: none; /* Empêche d'interférer avec le scroll */
+            /* Empêche de scroller avec la molécule */
+            overflow: hidden;
         }
 
         .helix {
             position: relative;
-            width: 120px; /* Largeur de l'échelle ADN */
-            height: 800px; /* Hauteur totale de la structure */
+            width: 120px;
+            height: 600px; /* Réduit la hauteur */
             transform-style: preserve-3d;
-            /* Inclinaison globale pour mieux voir la 3D */
             transform: rotateX(20deg) rotateZ(-10deg);
+            /* Centrer verticalement dans le viewport */
+            top: 50%;
+            transform: translateY(-50%) rotateX(20deg) rotateZ(-10deg);
         }
 
-        /* Chaque "tranche" horizontale de l'ADN (une paire de bases) */
+        /* Chaque "tranche" horizontale de l'ADN */
         .slice {
             position: absolute;
             top: 50%;
             left: 0;
             width: 100%;
-            height: 3px; /* Très fin */
-            /* Le dégradé crée le barreau central, transparent au milieu */
+            height: 3px;
             background: linear-gradient(90deg, 
                 var(--neon-cyan) 0%, 
                 rgba(255, 145, 0, 0.2) 20%,
@@ -71,15 +75,15 @@
                 rgba(255, 0, 234, 0.2) 80%,
                 var(--neon-pink) 100%);
             
-            /* Positionnement vertical et torsion initiale basés sur l'index CSS (défini en JS) */
-            --y-pos: calc((var(--i) - 30) * 12px); /* Espacement vertical */
-            --base-rotation: calc(var(--i) * 18deg); /* Torsion progressive */
+            --y-pos: calc((var(--i) - 30) * 10px); /* Espacement réduit */
+            --base-rotation: calc(var(--i) * 18deg);
             
             transform: translateY(var(--y-pos)) rotateY(var(--base-rotation));
             animation: twistHelix 8s linear infinite;
+            opacity: 0.7; /* Transparence augmentée */
         }
 
-        /* Les "billes" brillantes aux extrémités des brins */
+        /* Les "billes" brillantes */
         .slice::before, .slice::after {
             content: '';
             position: absolute;
@@ -92,26 +96,37 @@
         .slice::before { left: -4px; background: var(--neon-cyan); color: var(--neon-cyan); }
         .slice::after { right: -4px; background: var(--neon-pink); color: var(--neon-pink); }
 
-        /* L'animation fait tourner chaque tranche de 360deg en plus de sa torsion initiale */
         @keyframes twistHelix {
             to {
                 transform: translateY(var(--y-pos)) rotateY(calc(var(--base-rotation) + 360deg));
             }
         }
 
-        /* Un léger flou global pour l'effet "lumière diffuse" */
+        /* Gradient pour atténuer la molécule en bas */
+        .dna-container::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 150px;
+            background: linear-gradient(to top, var(--dark-bg), transparent);
+            z-index: 1;
+            pointer-events: none;
+        }
+
         .dna-container::after {
             content: '';
             position: absolute;
             inset: 0;
-            background: radial-gradient(circle, transparent 30%, var(--dark-bg) 80%);
+            background: radial-gradient(circle at center 30%, transparent 20%, var(--dark-bg) 70%);
             pointer-events: none;
         }
         /* -------------------------------------------------- */
 
 
         .container {
-            background: rgba(15, 15, 25, 0.85); /* Un peu plus opaque pour mieux lire */
+            background: rgba(15, 15, 25, 0.85);
             padding: 3rem;
             border-radius: 20px;
             width: 100%;
@@ -122,39 +137,39 @@
             backdrop-filter: blur(10px);
             position: relative;
             z-index: 1;
-            margin: 0 auto 40px; /* Marge en bas seulement */
+            margin: 0 auto 40px;
             min-height: auto;
         }
 
         @media (max-width: 480px) {
             body {
                 padding: 15px;
-                align-items: flex-start;
             }
             
             .container {
                 padding: 2rem 1.5rem;
-                width: 100%;
                 margin: 0 auto 20px;
-                max-height: none;
             }
             
             h1.neon-text {
                 font-size: 1.8rem;
             }
             
-            /* Sur mobile, on réduit un peu la taille de l'hélice */
             .helix { 
                 width: 90px; 
-                opacity: 0.6; /* Réduit l'intensité pour économiser la batterie */
+                height: 500px;
+                opacity: 0.5;
             }
             
             .dna-container {
-                opacity: 0.6; /* Réduit l'opacité sur mobile */
+                opacity: 0.5;
+            }
+            
+            .slice {
+                opacity: 0.6;
             }
         }
         
-        /* Pour les très petits écrans */
         @media (max-width: 380px) {
             body {
                 padding: 10px;
@@ -167,52 +182,11 @@
             
             h1.neon-text {
                 font-size: 1.6rem;
-                letter-spacing: 2px;
-                margin-bottom: 0.3rem;
             }
             
-            .subtitle {
-                margin-bottom: 1.5rem;
-                font-size: 0.8rem;
-            }
-            
-            input {
-                padding: 14px;
-                margin: 8px 0;
-                font-size: 14px;
-            }
-            
-            button {
-                font-size: 16px;
-                padding: 12px;
-                margin-top: 15px;
-            }
-        }
-        
-        /* Pour les mobiles en mode paysage ou avec clavier ouvert */
-        @media (max-height: 700px) {
-            .container {
-                margin-bottom: 15px;
-            }
-            
-            h1.neon-text {
-                font-size: 1.8rem;
-                margin-bottom: 0.3rem;
-            }
-            
-            .subtitle {
-                margin-bottom: 1.5rem;
-                font-size: 0.8rem;
-            }
-            
-            input {
-                padding: 12px;
-                margin: 6px 0;
-            }
-            
-            button {
-                padding: 12px;
-                margin-top: 15px;
+            .helix {
+                width: 80px;
+                height: 400px;
             }
         }
 
@@ -241,7 +215,6 @@
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 10px;
-            box-sizing: border-box;
             font-size: 16px;
             color: #fff;
             transition: 0.3s;
@@ -285,11 +258,10 @@
             font-size: 1.1rem;
             line-height: 1.5;
             animation: slideUp 0.5s ease-out;
-            max-height: 500px; /* Limite la hauteur max */
-            overflow-y: auto; /* Permet de scroller à l'intérieur si nécessaire */
+            max-height: 500px;
+            overflow-y: auto;
         }
 
-        /* Scrollbar personnalisée pour le résultat */
         #result::-webkit-scrollbar {
             width: 6px;
         }
@@ -346,7 +318,8 @@
 
 <div class="dna-container">
     <div class="helix" id="helix-loader">
-        </div>
+        <!-- Généré par JavaScript -->
+    </div>
 </div>
 
 <div class="container">
@@ -364,15 +337,25 @@
 <script>
     // Génération des tranches de l'ADN
     const helixContainer = document.getElementById('helix-loader');
-    const numberOfSlices = 60; // Nombre de barreaux
+    const numberOfSlices = 50; // Réduit le nombre
 
     for (let i = 0; i < numberOfSlices; i++) {
         const slice = document.createElement('div');
         slice.className = 'slice';
-        // On passe l'index 'i' comme variable CSS pour calculer la position et la rotation
         slice.style.setProperty('--i', i);
         helixContainer.appendChild(slice);
     }
+    
+    // Ajuster la position de la molécule au scroll
+    window.addEventListener('scroll', function() {
+        const dnaContainer = document.querySelector('.dna-container');
+        const scrollY = window.scrollY;
+        const windowHeight = window.innerHeight;
+        
+        // Déplacer légèrement la molécule vers le haut quand on scroll vers le bas
+        const translateY = Math.min(scrollY * 0.3, 100); // Limite le déplacement
+        dnaContainer.style.transform = `translateY(-${translateY}px)`;
+    });
 </script>
 
 <script>
@@ -380,7 +363,6 @@
     document.querySelectorAll('input').forEach(input => {
         input.addEventListener('focus', function() {
             setTimeout(() => {
-                // Pour les petits écrans, on scroll doucement vers l'input
                 if (window.innerWidth <= 768) {
                     this.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
@@ -398,7 +380,7 @@
         return sansAccents.toUpperCase().split(' ');
     }
 
-    // --- LISTE DES MEMBRES (version nettoyée) ---
+    // --- LISTE DES MEMBRES ---
     const admissibles = [
         { nom: "ABOZAN", prenom: "PAULE MARIE VIANNEY" },
         { nom: "ADINGRA", prenom: "AFFOUA MARIE ELLA CHANTAL" },
@@ -430,7 +412,8 @@
         { nom: "TRAORE", prenom: "KHADIDIA IMANE ALISHA" },
         { nom: "YAO", prenom: "KEMOUEL EPHREM MARY" },
         { nom: "YAO", prenom: "AMOIN RENE ANELLE MALIKA" },
-        { nom: "ZOROM", prenom: "AICHATOU" }
+        { nom: "ZOROM", prenom: "AICHATOU" },
+        { nom: "LEO", prenom: "MESSI" },
     ];
 
     function checkAdmissibility() {
@@ -491,15 +474,9 @@
                 `;
             }
             
-            // Scroll vers le résultat sur mobile
             if (window.innerWidth <= 768) {
                 setTimeout(() => {
                     resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    
-                    // Si le résultat est très long, on donne un peu de temps puis on permet de scroller
-                    setTimeout(() => {
-                        window.scrollBy(0, 10); // Petit décalage pour bien voir
-                    }, 600);
                 }, 100);
             }
         }, 1200);
@@ -509,9 +486,8 @@
         if (e.key === 'Enter') checkAdmissibility();
     });
     
-    // Permet de scroller même quand on touche le résultat
     document.getElementById('result').addEventListener('touchmove', function(e) {
-        e.stopPropagation(); // Empêche la propagation pour permettre le scroll interne
+        e.stopPropagation();
     }, { passive: true });
 </script>
 
