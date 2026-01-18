@@ -12,6 +12,10 @@
             --dark-bg: #080810;
         }
 
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             font-family: 'Segoe UI', sans-serif;
             background-color: var(--dark-bg);
@@ -19,13 +23,14 @@
             background-image: radial-gradient(circle at 50% 50%, rgba(15, 15, 25, 1) 0%, #000 100%);
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start; /* Changé de center à flex-start */
             min-height: 100vh;
             margin: 0;
             color: #fff;
             overflow-x: hidden;
             overflow-y: auto; /* Permet le défilement vertical */
             perspective: 1000px; /* Donne la profondeur 3D à toute la scène */
+            padding: 20px; /* Ajouté pour l'espacement */
         }
 
         /* --- NOUVELLE ANIMATION DOUBLE HÉLICE 3D --- */
@@ -106,31 +111,32 @@
 
 
         .container {
-            background: rgba(15, 15, 25, 0.75); /* Un peu plus transparent pour voir l'ADN */
+            background: rgba(15, 15, 25, 0.85); /* Un peu plus opaque pour mieux lire */
             padding: 3rem;
             border-radius: 20px;
-            width: 90%;
+            width: 100%;
             max-width: 480px;
             text-align: center;
             border: 1px solid rgba(0, 255, 255, 0.2);
-            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5); /* Ombre plus sombre pour le contraste */
-            backdrop-filter: blur(10px); /* Flou d'arrière-plan réduit pour mieux voir l'animation */
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
             position: relative;
             z-index: 1;
-            margin: 40px auto; /* Ajouté pour l'espacement sur mobile */
+            margin: 0 auto 40px; /* Marge en bas seulement */
+            min-height: auto;
         }
 
         @media (max-width: 480px) {
             body {
-                padding: 10px; /* Ajouté pour éviter que le contenu touche les bords */
-                align-items: flex-start; /* Aligne en haut sur mobile */
+                padding: 15px;
+                align-items: flex-start;
             }
             
             .container {
-                padding: 1.5rem;
-                width: 92%;
-                margin: 30px auto; /* Meilleure gestion des marges */
-                max-height: none; /* Supprime toute limitation de hauteur */
+                padding: 2rem 1.5rem;
+                width: 100%;
+                margin: 0 auto 20px;
+                max-height: none;
             }
             
             h1.neon-text {
@@ -140,20 +146,23 @@
             /* Sur mobile, on réduit un peu la taille de l'hélice */
             .helix { 
                 width: 90px; 
-                opacity: 0.7; /* Réduit l'intensité pour économiser la batterie */
+                opacity: 0.6; /* Réduit l'intensité pour économiser la batterie */
             }
             
             .dna-container {
-                opacity: 0.7; /* Réduit l'opacité sur mobile */
+                opacity: 0.6; /* Réduit l'opacité sur mobile */
             }
         }
         
         /* Pour les très petits écrans */
         @media (max-width: 380px) {
+            body {
+                padding: 10px;
+            }
+            
             .container {
-                padding: 1.2rem;
-                width: 95%;
-                margin: 20px auto;
+                padding: 1.5rem 1.2rem;
+                margin-bottom: 15px;
             }
             
             h1.neon-text {
@@ -170,6 +179,7 @@
             input {
                 padding: 14px;
                 margin: 8px 0;
+                font-size: 14px;
             }
             
             button {
@@ -182,8 +192,7 @@
         /* Pour les mobiles en mode paysage ou avec clavier ouvert */
         @media (max-height: 700px) {
             .container {
-                margin-top: 20px;
-                margin-bottom: 20px;
+                margin-bottom: 15px;
             }
             
             h1.neon-text {
@@ -197,12 +206,12 @@
             }
             
             input {
-                padding: 14px;
-                margin: 8px 0;
+                padding: 12px;
+                margin: 6px 0;
             }
             
             button {
-                padding: 14px;
+                padding: 12px;
                 margin-top: 15px;
             }
         }
@@ -276,6 +285,23 @@
             font-size: 1.1rem;
             line-height: 1.5;
             animation: slideUp 0.5s ease-out;
+            max-height: 500px; /* Limite la hauteur max */
+            overflow-y: auto; /* Permet de scroller à l'intérieur si nécessaire */
+        }
+
+        /* Scrollbar personnalisée pour le résultat */
+        #result::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        #result::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+        }
+        
+        #result::-webkit-scrollbar-thumb {
+            background: var(--neon-cyan);
+            border-radius: 3px;
         }
 
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -301,6 +327,18 @@
             border-top: 1px solid rgba(0, 255, 136, 0.3);
             padding-top: 15px;
             font-style: italic;
+            line-height: 1.6;
+            text-align: left;
+            background: rgba(0, 255, 136, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .invitation-box strong {
+            color: #00ff88;
+            display: block;
+            margin-bottom: 5px;
         }
     </style>
 </head>
@@ -429,21 +467,25 @@
             if (estAdmis) {
                 resultDiv.className = "success";
                 resultDiv.innerHTML = `
-                    <strong>✅ CORRESPONDANCE GÉNÉTIQUE TROUVÉE</strong><br>
-                    Félicitations <strong>${nomSaisiBrut.toUpperCase()} ${prenomSaisiBrut.charAt(0).toUpperCase() + prenomSaisiBrut.slice(1).toLowerCase()}</strong> !<br>
-                    Vous êtes officiellement admissible à DNA FAMILY.<br>
+                    <strong>✅ CORRESPONDANCE GÉNÉTIQUE TROUVÉE</strong><br><br>
+                    Félicitations <strong>${nomSaisiBrut.toUpperCase()} ${prenomSaisiBrut.charAt(0).toUpperCase() + prenomSaisiBrut.slice(1).toLowerCase()}</strong> !<br><br>
+                    Vous êtes officiellement admissible à DNA FAMILY.<br><br>
                     <div class="invitation-box">
-                        Vous êtes convié(e) lundi à passer les entretiens, dans une salle qui vous sera indiquée ultérieurement.
-                        Merci de bien vouloir transmettre votre adresse e‑mail au numéro WhatsApp +225 05 8485 4100 afin de recevoir la suite des informations
+                        <strong>📋 INFORMATIONS IMPORTANTES :</strong><br>
+                        Vous êtes convié(e) <strong>lundi</strong> à passer les entretiens, dans une salle qui vous sera indiquée ultérieurement.<br><br>
+                        <strong>📧 ACTION REQUISE :</strong><br>
+                        Merci de bien vouloir transmettre votre adresse e‑mail au numéro WhatsApp <strong>+225 05 8485 4100</strong> afin de recevoir la suite des informations (horaire, lieu exact, etc.).<br><br>
+                        <strong>⚠️ IMPORTANT :</strong><br>
+                        Sans réception de votre email, nous ne pourrons pas vous envoyer les détails de convocation.
                     </div>
                 `;
             } else {
                 resultDiv.className = "error";
                 resultDiv.innerHTML = `
-                    ❌ <strong>AUCUNE CORRESPONDANCE</strong><br>
-                    Votre profil n'a pas été identifié dans la DNA FAMILY.<br>
+                    ❌ <strong>AUCUNE CORRESPONDANCE</strong><br><br>
+                    Votre profil n'a pas été identifié dans la DNA FAMILY.<br><br>
                     <small style="opacity:0.8;margin-top:10px;display:block">
-                        Note : Recherche exacte requise<br>
+                        <strong>Note :</strong> Recherche exacte requise<br>
                         Saisissez le prénom complet
                     </small>
                 `;
@@ -452,7 +494,12 @@
             // Scroll vers le résultat sur mobile
             if (window.innerWidth <= 768) {
                 setTimeout(() => {
-                    resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    
+                    // Si le résultat est très long, on donne un peu de temps puis on permet de scroller
+                    setTimeout(() => {
+                        window.scrollBy(0, 10); // Petit décalage pour bien voir
+                    }, 600);
                 }, 100);
             }
         }, 1200);
@@ -461,6 +508,11 @@
     document.addEventListener('keypress', function(e) {
         if (e.key === 'Enter') checkAdmissibility();
     });
+    
+    // Permet de scroller même quand on touche le résultat
+    document.getElementById('result').addEventListener('touchmove', function(e) {
+        e.stopPropagation(); // Empêche la propagation pour permettre le scroll interne
+    }, { passive: true });
 </script>
 
 </body>
